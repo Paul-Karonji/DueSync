@@ -20,11 +20,11 @@ export default async function HomePage() {
 
   // Show dashboard for authenticated users
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-slate-900 transition-colors" suppressHydrationWarning>
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-900 transition-colors">
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4" suppressHydrationWarning>
-          <div className="flex items-center justify-between gap-2" suppressHydrationWarning>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex flex-col gap-1 sm:gap-2 min-w-0 flex-1">
               <Logo size="sm" showText={true} showTagline={false} />
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 ml-1 truncate">

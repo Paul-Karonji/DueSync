@@ -147,6 +147,7 @@ export function EditTaskDialog({
             <Input
               id="edit-title"
               placeholder="What needs to be done?"
+              autoFocus
               {...register('title')}
               className={errors.title ? 'border-red-500' : ''}
             />

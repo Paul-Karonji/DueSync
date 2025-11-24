@@ -9,6 +9,7 @@ import { ServiceWorkerProvider } from "@/components/ServiceWorkerProvider"
 import { Toaster } from "sonner"
 import { Analytics } from "@vercel/analytics/react"
 import { InstallPrompt } from "@/components/pwa/InstallPrompt"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -196,15 +197,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          <SessionProvider>
-            <ServiceWorkerProvider>
-              <QueryProvider>
-                {children}
-                <Toaster position="top-right" richColors />
-                <InstallPrompt />
-              </QueryProvider>
-            </ServiceWorkerProvider>
-          </SessionProvider>
+          <ErrorBoundary>
+            <SessionProvider>
+              <ServiceWorkerProvider>
+                <QueryProvider>
+                  {children}
+                  <Toaster position="top-right" richColors />
+                  <InstallPrompt />
+                </QueryProvider>
+              </ServiceWorkerProvider>
+            </SessionProvider>
+          </ErrorBoundary>
         </ThemeProvider>
         <Analytics />
 

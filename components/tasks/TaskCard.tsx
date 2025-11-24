@@ -170,14 +170,14 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete, onArchive }
         {/* Action Buttons (show on hover or always on mobile) */}
         <div className={cn(
           "flex items-center gap-0.5 sm:gap-1 transition-opacity flex-shrink-0",
-          "md:opacity-0 md:group-hover:opacity-100", // Hide on desktop, show on hover
+          "md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100", // Show on hover AND focus
           "opacity-100" // Always visible on mobile
         )}>
           <CalendarSyncButton task={task} size="icon" variant="ghost" />
           {onEdit && (
             <button
               onClick={() => onEdit(task)}
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               aria-label={`Edit task "${task.title}"`}
             >
               <Pencil className="h-4 w-4" />
@@ -186,7 +186,7 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete, onArchive }
           {onArchive && task.status !== 'ARCHIVED' && (
             <button
               onClick={() => onArchive(task.id)}
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
               aria-label={`Archive task "${task.title}"`}
             >
               <Archive className="h-4 w-4" />
@@ -195,7 +195,7 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete, onArchive }
           {onDelete && (
             <button
               onClick={() => onDelete(task.id)}
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               aria-label={`Delete task "${task.title}"`}
             >
               <Trash2 className="h-4 w-4" />
