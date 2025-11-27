@@ -32,7 +32,7 @@ DueSync integrates with Google Calendar to automatically sync your tasks as cale
    - `openid`
    - `email`
    - `profile`
-   - `https://www.googleapis.com/auth/calendar`
+   - `https://www.googleapis.com/auth/calendar.events`
 5. Add test users if needed
 
 ### 3. Create OAuth Credentials
