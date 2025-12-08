@@ -1,7 +1,7 @@
 // Service Worker for DueSync PWA
 // Handles push notifications, offline caching, and app shell
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.1.0';
 const CACHE_NAME = `duesync-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `duesync-runtime-${CACHE_VERSION}`;
 const IMAGE_CACHE = `duesync-images-${CACHE_VERSION}`;

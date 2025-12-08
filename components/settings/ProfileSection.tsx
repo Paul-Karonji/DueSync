@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Calendar, Globe, Loader2, PlayCircle } from 'lucide-react';
+import { User, Mail, Calendar, Globe, Loader2, PlayCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
 
@@ -307,6 +307,27 @@ export function ProfileSection({ user }: ProfileSectionProps) {
               </>
             )}
           </Button>
+        </div>
+
+        <Separator />
+
+        {/* App Version */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            App Version
+          </Label>
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+              v1.1.0
+            </span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">
+              Security Patched (CVE-2025-55182/CVE-2025-66478)
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-slate-400">
+            DueSync is running the latest version with security updates
+          </p>
         </div>
 
         <Separator />

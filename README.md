@@ -1,7 +1,7 @@
 # DueSync - Smart Task Management & Google Calendar Sync
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.7-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -143,7 +143,7 @@ For detailed configuration instructions, see:
 ## 🏗️ Tech Stack
 
 ### Frontend
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 15.5.7 (App Router - Security Patched)
 - **Language:** TypeScript 5
 - **Styling:** Tailwind CSS 3.4
 - **UI Components:** Radix UI primitives
@@ -278,6 +278,7 @@ Security is a top priority. DueSync implements:
 - **HTTPS-only** in production
 - **Input validation** with Zod schemas
 - **SQL injection prevention** via Prisma ORM
+- **CVE-2025-55182/CVE-2025-66478 patched** - Updated to Next.js 15.5.7 to fix critical RSC vulnerability
 
 For security concerns, please see our [Security Policy](SECURITY.md).
 
