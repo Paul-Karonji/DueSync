@@ -10,6 +10,20 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Serve Digital Asset Links for TWA verification
+        source: '/.well-known/assetlinks.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
+      {
         // Apply security headers to all routes
         source: '/:path*',
         headers: [

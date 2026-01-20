@@ -140,6 +140,11 @@ For detailed configuration instructions, see:
 - [Timezone Support](docs/TIMEZONE_SUPPORT.md) - Working with timezones
 - [Error Monitoring](docs/ERROR_MONITORING.md) - Setting up Sentry monitoring
 
+### Deployment
+
+- [Play Store Deployment](docs/PLAY_STORE_DEPLOYMENT.md) - Deploy to Google Play Store (TWA)
+- [Play Store Quick Start](docs/PLAY_STORE_QUICKSTART.md) - Quick reference guide
+
 ## 🏗️ Tech Stack
 
 ### Frontend
@@ -304,9 +309,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🗺️ Roadmap
 
+### In Progress
+- [x] **Android app (Google Play Store)** - TWA implementation underway! 🎉
+
 ### Upcoming Features
+- [ ] iOS app (App Store)
 - [ ] Team collaboration and task sharing
-- [ ] Mobile apps (iOS & Android)
 - [ ] Desktop app (Electron)
 - [ ] Subtasks and task dependencies
 - [ ] Calendar view

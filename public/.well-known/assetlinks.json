@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.wiktechnologies.duesync",
+            "sha256_cert_fingerprints": [
+                "PLACEHOLDER_FINGERPRINT_WILL_BE_GENERATED_NEXT"
+            ]
+        }
+    }
+]

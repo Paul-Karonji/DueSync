@@ -70,7 +70,11 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["productivity", "business", "utilities"],
+  "categories": [
+    "productivity",
+    "business",
+    "utilities"
+  ],
   "shortcuts": [
     {
       "name": "Add Task",
@@ -123,5 +127,11 @@
       "form_factor": "narrow"
     }
   ],
-  "prefer_related_applications": false
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.wiktechnologies.duesync"
+    }
+  ]
 }
