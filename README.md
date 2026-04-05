@@ -139,6 +139,7 @@ For detailed configuration instructions, see:
 - [Categories & Tags](docs/CATEGORIES_TAGS.md) - Organizing with categories and tags
 - [Timezone Support](docs/TIMEZONE_SUPPORT.md) - Working with timezones
 - [Error Monitoring](docs/ERROR_MONITORING.md) - Setting up Sentry monitoring
+- [MCP Server](docs/MCP_SERVER.md) - Give AI agents read-only planning access to DueSync
 
 ### Deployment
 
@@ -178,6 +179,8 @@ For detailed configuration instructions, see:
 npm run dev          # Start development server
 npm run build        # Build for production
 npm start            # Start production server
+npm run mcp          # Start the remote DueSync MCP HTTP server
+npm run mcp:stdio    # Start the local stdio MCP server
 npm run lint         # Run ESLint
 npm run type-check   # Run TypeScript compiler check
 ```

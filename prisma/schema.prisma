@@ -26,10 +26,27 @@ model User {
   onboardingSkipped      Boolean                 @default(false)
   accounts               Account[]
   categories             Category[]
+  mcpAccessTokens        McpAccessToken[]
   notifications          NotificationPreference?
   sessions               Session[]
   tags                   Tag[]
   tasks                  Task[]
+}
+
+model McpAccessToken {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  tokenHash  String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([userId, createdAt])
 }
 
 model Account {
