@@ -1,4 +1,5 @@
 import { Priority, Status } from '@prisma/client';
+import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -21,6 +22,14 @@ function asToolResult(text: string, structuredContent?: Record<string, unknown>)
     content: [{ type: 'text' as const, text }],
     ...(structuredContent ? { structuredContent } : {}),
   };
+}
+
+function requireAuthInfo(extra?: { authInfo?: AuthInfo }) {
+  if (!extra?.authInfo) {
+    throw new Error('Missing MCP authentication context.');
+  }
+
+  return extra.authInfo;
 }
 
 function summarizeTasks(tasks: Array<{ title: string; priority: string; dueDateLabel: string; dueTime: string | null }>) {
@@ -52,7 +61,7 @@ export function createDueSyncMcpServer() {
       description: 'Return the authenticated DueSync user profile, timezone, and high-level task counts.',
     },
     async (extra) => {
-      const userContext = await getUserContext(extra.authInfo);
+      const userContext = await getUserContext(requireAuthInfo(extra));
 
       return asToolResult(
         `Using DueSync user ${userContext.email} in timezone ${userContext.timezone}. Pending: ${userContext.taskCounts.pending}, completed: ${userContext.taskCounts.completed}, archived: ${userContext.taskCounts.archived}.`,
@@ -78,7 +87,7 @@ export function createDueSyncMcpServer() {
       },
     },
     async (input, extra) => {
-      const result = await listTasks(input, extra.authInfo);
+      const result = await listTasks(input, requireAuthInfo(extra));
 
       return asToolResult(
         summarizeTasks(result.tasks),
@@ -104,7 +113,7 @@ export function createDueSyncMcpServer() {
       },
     },
     async ({ taskId }, extra) => {
-      const result = await getTask(taskId, extra.authInfo);
+      const result = await getTask(taskId, requireAuthInfo(extra));
       const task = result.task;
       const dueTime = task.dueTime ? ` at ${task.dueTime}` : '';
 
@@ -131,7 +140,7 @@ export function createDueSyncMcpServer() {
       },
     },
     async ({ date }, extra) => {
-      const result = await getTasksForDay(date, extra.authInfo);
+      const result = await getTasksForDay(date, requireAuthInfo(extra));
 
       return asToolResult(
         `Found ${result.tasks.length} pending task${result.tasks.length === 1 ? '' : 's'} for ${result.date}.`,
@@ -155,7 +164,7 @@ export function createDueSyncMcpServer() {
       description: 'List categories for the authenticated DueSync user.',
     },
     async (extra) => {
-      const result = await listCategories(extra.authInfo);
+      const result = await listCategories(requireAuthInfo(extra));
       const preview = result.categories.length
         ? result.categories.map((category) => `${category.name} (${category.taskCount})`).join(', ')
         : 'No categories found.';
@@ -181,7 +190,7 @@ export function createDueSyncMcpServer() {
       description: 'List tags for the authenticated DueSync user.',
     },
     async (extra) => {
-      const result = await listTags(extra.authInfo);
+      const result = await listTags(requireAuthInfo(extra));
       const preview = result.tags.length
         ? result.tags.map((tag) => `${tag.name} (${tag.taskCount})`).join(', ')
         : 'No tags found.';
@@ -215,7 +224,7 @@ export function createDueSyncMcpServer() {
       },
     },
     async ({ date, availableMinutes, startTime, breakMinutes, includeBacklog, maxTasks }, extra) => {
-      const result = await getPendingTasksForPlanning(date, includeBacklog, extra.authInfo);
+      const result = await getPendingTasksForPlanning(date, includeBacklog, requireAuthInfo(extra));
       const planned = buildDayPlan(result.tasks, {
         date: result.date,
         timezone: result.user.timezone,
