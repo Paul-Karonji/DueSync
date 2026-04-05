@@ -26,7 +26,7 @@ function normalizePooledDatabaseUrl(url?: string) {
     // A large per-instance pool size on a pooled Supabase URL can still exhaust
     // the underlying database very quickly, so clamp it to a conservative value.
     if (Number.isNaN(configuredLimit) || configuredLimit > 5) {
-      parsed.searchParams.set('connection_limit', '1')
+      parsed.searchParams.set('connection_limit', '3')
     }
 
     if (!parsed.searchParams.has('pool_timeout')) {
@@ -48,7 +48,7 @@ function normalizeDirectDatabaseUrl(url?: string) {
     const parsed = new URL(url)
 
     if (!parsed.searchParams.has('connection_limit')) {
-      parsed.searchParams.set('connection_limit', '1')
+      parsed.searchParams.set('connection_limit', '3')
     }
 
     if (!parsed.searchParams.has('pool_timeout')) {
