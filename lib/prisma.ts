@@ -39,7 +39,54 @@ function normalizePooledDatabaseUrl(url?: string) {
   }
 }
 
-process.env.DATABASE_URL = normalizePooledDatabaseUrl(process.env.DATABASE_URL)
+function normalizeDirectDatabaseUrl(url?: string) {
+  if (!url) {
+    return url
+  }
+
+  try {
+    const parsed = new URL(url)
+
+    if (!parsed.searchParams.has('connection_limit')) {
+      parsed.searchParams.set('connection_limit', '1')
+    }
+
+    if (!parsed.searchParams.has('pool_timeout')) {
+      parsed.searchParams.set('pool_timeout', '20')
+    }
+
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}
+
+function resolveRuntimeDatabaseUrl() {
+  const pooledUrl = normalizePooledDatabaseUrl(process.env.DATABASE_URL)
+  const directUrl = normalizeDirectDatabaseUrl(process.env.DIRECT_URL)
+
+  if (!pooledUrl) {
+    return directUrl
+  }
+
+  try {
+    const parsedPooledUrl = new URL(pooledUrl)
+    const usesSupabasePooler = parsedPooledUrl.hostname.includes('pooler.supabase.com')
+
+    // This deployment has shown pooler checkout timeouts while the direct Postgres
+    // port remains healthy. Prefer the direct runtime URL with a single connection
+    // so production API routes can recover without requiring an urgent env change.
+    if (usesSupabasePooler && directUrl) {
+      return directUrl
+    }
+  } catch {
+    return pooledUrl
+  }
+
+  return pooledUrl
+}
+
+process.env.DATABASE_URL = resolveRuntimeDatabaseUrl()
 
 export const prisma =
   globalForPrisma.prisma ??
