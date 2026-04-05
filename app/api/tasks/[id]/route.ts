@@ -4,9 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth';
 import { updateTaskSchema, taskIdSchema } from '@/lib/validations/task';
-import { calculateNextRecurringDate } from '@/lib/utils';
-import { Status } from '@prisma/client';
-import { updateCalendarEvent, deleteCalendarEvent } from '@/lib/google-calendar';
+import {
+  deleteTaskForUser,
+  TaskMutationError,
+  updateTaskForUser,
+} from '@/lib/tasks/service';
 
 // PATCH /api/tasks/[id] - Update a task
 export async function PATCH(
@@ -26,149 +28,7 @@ export async function PATCH(
 
     // Validate request body
     const validatedData = updateTaskSchema.parse(body);
-
-    // Check if task exists and belongs to user
-    const existingTask = await prisma.task.findUnique({
-      where: { id },
-    });
-
-    if (!existingTask) {
-      return NextResponse.json({ success: false, error: 'Task not found' }, { status: 404 });
-    }
-
-    if (existingTask.userId !== userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
-    }
-
-    // Extract tagIds from the validated data
-    const { tagIds, ...taskData } = validatedData;
-
-    // Prepare update data
-    const updateData: any = {
-      ...taskData,
-    };
-
-    // Convert date if provided
-    if (validatedData.dueDate) {
-      updateData.dueDate = new Date(validatedData.dueDate);
-    }
-
-    if (validatedData.completedAt) {
-      updateData.completedAt = new Date(validatedData.completedAt);
-    }
-
-    // Handle tags update if provided
-    if (tagIds !== undefined) {
-      // Delete existing tags and create new ones
-      updateData.tags = {
-        deleteMany: {},
-        create: tagIds.map((tagId) => ({
-          tag: {
-            connect: { id: tagId },
-          },
-        })),
-      };
-    }
-
-    // Update task
-    const task = await prisma.task.update({
-      where: { id },
-      data: updateData,
-      include: {
-        category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
-    });
-
-    // Attempt to automatically update Google Calendar event (async, non-blocking)
-    if (task.googleEventId) {
-      // If task is completed, delete the calendar event
-      if (task.status === Status.COMPLETED) {
-        const eventIdToDelete = task.googleEventId;
-        console.log('Task completed, deleting calendar event:', eventIdToDelete);
-
-        // Remove googleEventId from task immediately (fast database operation)
-        await prisma.task.update({
-          where: { id },
-          data: { googleEventId: null },
-        });
-
-        // Delete from Google Calendar asynchronously (fire-and-forget)
-        deleteCalendarEvent(userId, eventIdToDelete)
-          .then(() => {
-            console.log('Calendar event deleted successfully:', eventIdToDelete);
-          })
-          .catch((calendarError: any) => {
-            console.error('Failed to delete calendar event:', {
-              taskId: task.id,
-              eventId: eventIdToDelete,
-              error: calendarError.message,
-            });
-          });
-      } else {
-        // Task still pending, update the calendar event (fire-and-forget)
-        console.log('Auto-updating calendar event for task:', task.id);
-        updateCalendarEvent(userId, task.googleEventId, task)
-          .then(() => {
-            console.log('Calendar event updated successfully:', task.id);
-          })
-          .catch((calendarError: any) => {
-            console.error('Failed to auto-update calendar event:', {
-              taskId: task.id,
-              eventId: task.googleEventId,
-              error: calendarError.message,
-            });
-          });
-      }
-    }
-
-    // Generate next recurring instance if task was just completed
-    let nextTask = null;
-    if (
-      task.status === Status.COMPLETED &&
-      task.isRecurring &&
-      task.recurringPattern
-    ) {
-      try {
-        // Calculate next due date
-        const nextDueDate = calculateNextRecurringDate(task.dueDate, task.recurringPattern);
-
-        // Create the next recurring task instance
-        nextTask = await prisma.task.create({
-          data: {
-            title: task.title,
-            description: task.description,
-            dueDate: nextDueDate,
-            dueTime: task.dueTime,
-            priority: task.priority,
-            categoryId: task.categoryId,
-            estimatedTime: task.estimatedTime,
-            isRecurring: true,
-            recurringPattern: task.recurringPattern,
-            userId: task.userId,
-            status: Status.PENDING,
-            // Note: Tags are NOT copied per user preference
-          },
-          include: {
-            category: true,
-            tags: {
-              include: {
-                tag: true,
-              },
-            },
-          },
-        });
-
-        console.log(`Generated next recurring task: ${nextTask.id} for pattern: ${task.recurringPattern}`);
-      } catch (recurringError) {
-        console.error('Failed to generate recurring task:', recurringError);
-        // Don't fail the main update if recurring generation fails
-      }
-    }
+    const { task, nextTask } = await updateTaskForUser(userId, id, validatedData);
 
     return NextResponse.json({
       success: true,
@@ -187,6 +47,13 @@ export async function PATCH(
       return NextResponse.json(
         { success: false, error: 'Validation error', details: error.errors },
         { status: 400 }
+      );
+    }
+
+    if (error instanceof TaskMutationError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.statusCode }
       );
     }
 
@@ -210,41 +77,7 @@ export async function DELETE(
 
     // Validate task ID
     taskIdSchema.parse({ id });
-
-    // Check if task exists and belongs to user
-    const existingTask = await prisma.task.findUnique({
-      where: { id },
-    });
-
-    if (!existingTask) {
-      return NextResponse.json({ success: false, error: 'Task not found' }, { status: 404 });
-    }
-
-    if (existingTask.userId !== userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
-    }
-
-    // Delete task first (cascade will handle related records)
-    await prisma.task.delete({
-      where: { id },
-    });
-
-    // Attempt to delete from Google Calendar if synced (async, fire-and-forget)
-    if (existingTask.googleEventId) {
-      console.log('Deleting calendar event for task:', existingTask.id);
-      deleteCalendarEvent(userId, existingTask.googleEventId)
-        .then(() => {
-          console.log('Calendar event deleted successfully:', existingTask.googleEventId);
-        })
-        .catch((calendarError: any) => {
-          // Log error - task is already deleted
-          console.error('Failed to delete calendar event:', {
-            taskId: existingTask.id,
-            eventId: existingTask.googleEventId,
-            error: calendarError.message,
-          });
-        });
-    }
+    await deleteTaskForUser(userId, id);
 
     return NextResponse.json({
       success: true,
@@ -255,6 +88,13 @@ export async function DELETE(
 
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (error instanceof TaskMutationError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.statusCode }
+      );
     }
 
     return NextResponse.json(

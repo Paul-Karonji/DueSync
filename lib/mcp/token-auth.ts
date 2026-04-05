@@ -5,6 +5,7 @@ import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { prisma } from '../prisma';
 
 export const MCP_READ_SCOPE = 'duesync:mcp:read';
+export const MCP_WRITE_SCOPE = 'duesync:mcp:write';
 
 export interface IssueMcpAccessTokenInput {
   userId: string;
@@ -75,7 +76,7 @@ export async function verifyMcpAccessToken(token: string): Promise<AuthInfo> {
   return {
     token,
     clientId: `duesync-mcp:${tokenRecord.userId}`,
-    scopes: [MCP_READ_SCOPE],
+    scopes: [MCP_READ_SCOPE, MCP_WRITE_SCOPE],
     ...(tokenRecord.expiresAt
       ? {
           expiresAt: Math.floor(tokenRecord.expiresAt.getTime() / 1000),

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth';
 import { createTaskSchema, taskQuerySchema } from '@/lib/validations/task';
 import { Status, Priority } from '@prisma/client';
-import { createCalendarEvent } from '@/lib/google-calendar';
+import { createTaskForUser, TaskMutationError } from '@/lib/tasks/service';
 
 // GET /api/tasks - Fetch all tasks with optional filters
 export async function GET(request: NextRequest) {
@@ -142,61 +142,7 @@ export async function POST(request: NextRequest) {
 
     // Validate request body
     const validatedData = createTaskSchema.parse(body);
-
-    // Extract tagIds from the validated data
-    const { tagIds, ...taskData } = validatedData;
-
-    // Create task
-    const task = await prisma.task.create({
-      data: {
-        ...taskData,
-        userId,
-        dueDate: new Date(validatedData.dueDate),
-        tags: tagIds
-          ? {
-              create: tagIds.map((tagId) => ({
-                tag: {
-                  connect: { id: tagId },
-                },
-              })),
-            }
-          : undefined,
-      },
-      include: {
-        category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
-    });
-
-    // Attempt to automatically sync to Google Calendar (async, non-blocking)
-    // Fire-and-forget pattern - don't wait for calendar sync to complete
-    prisma.account.findFirst({
-      where: {
-        userId,
-        provider: 'google',
-      },
-    }).then((googleAccount) => {
-      if (googleAccount && googleAccount.access_token) {
-        console.log('Auto-syncing new task to Google Calendar:', task.id);
-        createCalendarEvent(userId, task)
-          .then(() => {
-            console.log('Task successfully synced to Google Calendar:', task.id);
-          })
-          .catch((calendarError: any) => {
-            // Log error but task creation already succeeded
-            console.error('Failed to auto-sync task to calendar:', {
-              taskId: task.id,
-              error: calendarError.message,
-            });
-          });
-      }
-    }).catch((error) => {
-      console.error('Failed to check Google account for calendar sync:', error);
-    });
+    const { task } = await createTaskForUser(userId, validatedData);
 
     // Return immediately without waiting for calendar sync
     return NextResponse.json(
@@ -225,6 +171,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Validation error', details: error.errors },
         { status: 400 }
+      );
+    }
+
+    if (error instanceof TaskMutationError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.statusCode }
       );
     }
 

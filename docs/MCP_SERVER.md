@@ -18,7 +18,7 @@ The app now includes a native Next route at:
 
 on your normal DueSync deployment.
 
-That means if DueSync is already deployed on Vercel, you do not need a separate MCP host just to expose read-only planning tools.
+That means if DueSync is already deployed on Vercel, you do not need a separate MCP host just to expose planning and task-management tools.
 
 ### Authentication
 
@@ -148,7 +148,7 @@ MCP_DUESYNC_USER_ID="your-cuid"
 
 ## Tools
 
-Both modes expose the same read-only tools:
+Both modes expose the same tools:
 
 - `get_user_context`
 - `list_tasks`
@@ -157,6 +157,11 @@ Both modes expose the same read-only tools:
 - `list_categories`
 - `list_tags`
 - `plan_day`
+- `create_task`
+- `update_task`
+- `complete_task`
+- `archive_task`
+- `delete_task`
 
 `plan_day` does not modify tasks. It scores pending work by urgency, priority, due date, and estimated time, then fits the best candidates into an available focus window.
 
@@ -169,6 +174,5 @@ Both modes expose the same read-only tools:
 
 ## Current Limits
 
-- The MCP server is read-only.
 - Tokens are managed by CLI today, not through the DueSync UI yet.
-- Write tools should go through shared task service functions before being added.
+- Categories and tags are still read-only through MCP today.
