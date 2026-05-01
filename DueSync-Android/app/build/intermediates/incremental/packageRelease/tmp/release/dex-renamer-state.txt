@@ -1,0 +1,4 @@
+#Thu Apr 30 19:26:08 EAT 2026
+base.0=C\:\\Users\\paul\\Documents\\Wik\\TaskIQ\\DueSync-Android\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
